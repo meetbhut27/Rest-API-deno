@@ -31,7 +31,7 @@ router.put('/todos/:todoId', async (ctx) => {
   const tid = ctx.params.todoId;
   const data = await ctx.request.body.json();
 
-  getDb().collection('todos').updateOne({ _id: new ObjectId(tid)},{ text : data.text});
+  await getDb().collection('todos').updateOne({ _id: new ObjectId(tid)},{$set:{ text : data.text}});
   ctx.response.body = { message: 'Updated todo' };
 });
 
