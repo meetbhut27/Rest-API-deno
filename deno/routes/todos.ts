@@ -1,5 +1,6 @@
 import { Router } from "https://deno.land/x/oak@v13.1.0/mod.ts";
 import { getDb } from "../helper/db_client.ts";
+import { ObjectId } from "npm:mongodb@6";
 
 const router = new Router();
 
@@ -7,8 +8,6 @@ interface Todo {
   id?: string;
   text: string;
 }
-
-let todos: Todo[] = [];
 
 router.get('/todos',async (ctx) => {
   const todos =  getDb().collection('todos').find();
@@ -31,16 +30,14 @@ router.post('/todos', async (ctx) => {
 router.put('/todos/:todoId', async (ctx) => {
   const tid = ctx.params.todoId;
   const data = await ctx.request.body.json();
-  const todoIndex = todos.findIndex((todo) => {
-    return todo.id === tid;
-  });
-  todos[todoIndex] = { id: todos[todoIndex].id, text: data.text };
+
+  getDb().collection('todos').updateOne({ _id: new ObjectId(tid)},{ text : data.text});
   ctx.response.body = { message: 'Updated todo' };
 });
 
 router.delete('/todos/:todoId', (ctx) => {
   const tid = ctx.params.todoId;
-  todos = todos.filter((todo) => todo.id !== tid);
+  getDb().collection('todos').deleteOne({_id : new ObjectId(tid)});
   ctx.response.body = { message: 'Deleted todo' };
 });
 
